@@ -1,0 +1,29 @@
+1. Connect the arduino
+2. load and input the configration
+
+ 	check box: with or without tone, 
+		   with or without laser stimulation, the toggle is for manual delivery of laser, usually for demo test
+                   with or without footshock
+		   with or without startdelay; usually, only in demo test without, in real experiment, we need a startdelay
+		   video preview will open a preview window of camera
+		   video record, if not check on, no video saved; so, in real experiment, it should be on
+	table: to assigin the specific trial that will shock or laser
+
+3. real experiment
+  first trial delay is the startdelay
+  then the inter trial interval is a random number between min interval and max interval
+  a. if laserPreSound is 0, every trial, the sound laser and led indicator will on at the same time, and the duration will be the sound Dur 
+
+  b. if laserPreSound is more than 0; laser and led will on at the same time, and then after laserPreSound time, the sound will on.
+  
+  c. laserPreSound should not be less than 0
+  
+  d. the shock will on at "shock delay" time before the end of sound. That is to say, if the shock delay + shock Dur = 0, the shock is co-terminated 
+  wit sound
+  
+  e. Trial end should be equal or more than sound dur + laserPreSound
+
+3. after all trial finished, there will be a 60 s after test. Just wait. then the video record will stop. 
+
+4. press the stop to save the configrations
+

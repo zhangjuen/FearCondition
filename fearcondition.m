@@ -22,7 +22,7 @@ function varargout = fearcondition(varargin)
 
 % Edit the above text to modify the response to help fearcondition
 
-% Last Modified by GUIDE v2.5 06-Sep-2018 16:16:52
+% Last Modified by GUIDE v2.5 19-Feb-2019 14:40:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -108,23 +108,25 @@ TrialEnd =  str2double(get(handles.edit_TrialEnd,'string'));
 handles.SoundD =  str2double(get(handles.edit_SoundDuration,'string'));
 handles.ShockD =  str2double(get(handles.edit_ShockDuration,'string'));
 handles.shockDelay =  str2double(get(handles.edit_shockDelay,'string'));
+LaserPreSound = str2double(get(handles.edit_LaserPreSound,'string'));
+StartDelay = str2double(get(handles.edit_startDelay,'string'));
 
 %timer define
-TrialStartTimer = timer('TimerFcn',{@TrialStartTimer_callback_fcn,handles},'Period',0.1,'StartDelay',180*get(handles.radiobutton_startDelay,'Value'));
+TrialStartTimer = timer('TimerFcn',{@TrialStartTimer_callback_fcn,handles},'Period',0.1,'StartDelay',StartDelay*get(handles.radiobutton_startDelay,'Value'));
 setappdata(0,'TrialStartTimer',TrialStartTimer);
 TrialRestartTimer = timer('TimerFcn',{@TrialRestartTimer_callback_fcn,handles},'Period',0.1,'StartDelay',TrialEnd);
 setappdata(0,'TrialRestartTimer',TrialRestartTimer);
 LaserOnTimer = timer('TimerFcn',{@LaserOnTimer_Callback,handles},'Period',0.1,'StartDelay',0);
 setappdata(0,'LaserOnTimer',LaserOnTimer);
-LaserOffTimer = timer('TimerFcn',{@LaserOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD);
+LaserOffTimer = timer('TimerFcn',{@LaserOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound);%sound off; laser off;
 setappdata(0,'LaserOffTimer',LaserOffTimer);
-SoundOnTimer = timer('TimerFcn',{@SoundOnTimer_Callback,handles},'Period',0.1,'StartDelay',0);
+SoundOnTimer = timer('TimerFcn',{@SoundOnTimer_Callback,handles},'Period',0.1,'StartDelay',LaserPreSound);
 setappdata(0,'SoundOnTimer',SoundOnTimer);
-SoundOffTimer = timer('TimerFcn',{@SoundOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD);
+SoundOffTimer = timer('TimerFcn',{@SoundOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound);
 setappdata(0,'SoundOffTimer',SoundOffTimer);
-ShockOnTimer = timer('TimerFcn',{@ShockOnTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+handles.shockDelay);
+ShockOnTimer = timer('TimerFcn',{@ShockOnTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound+handles.shockDelay);
 setappdata(0,'ShockOnTimer',ShockOnTimer);
-ShockOffTimer = timer('TimerFcn',{@ShockOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+handles.shockDelay+handles.ShockD);
+ShockOffTimer = timer('TimerFcn',{@ShockOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound+handles.shockDelay+handles.ShockD);
 setappdata(0,'ShockOffTimer',ShockOffTimer);
 VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',0.1,'StartDelay',0,'ExecutionMode','fixedRate');
 setappdata(0,'VideoTimer',VideoTimer);
@@ -293,7 +295,11 @@ function pushbutton_stop_Callback(hObject, eventdata, handles)
 
 set(handles.pushbutton_stop,'Visible','off');
 set(handles.pushbutton_start,'Visible','on');
-stop(timerfind); delete(timerfind);
+ts = timerfind;
+if ~isempty(ts)
+stop(timerfind); 
+delete(timerfind);
+end
 
 Config.FCtrialData = get(handles.uitable_trialData,'Data');
 % whos('FCtrialData')
@@ -557,12 +563,27 @@ function pushbutton_load_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 [ConfigName,ConfigFolderPath,index] = uigetfile('Select the Config File');
-if index        
+if index  
+    try
     Config = importdata([ConfigFolderPath,ConfigName]);
     set(handles.uitable_trialData,'Data',Config.FCtrialData);
     set(handles.checkbox_shockMode,'value',Config.ShockMode);
     set(handles.checkbox_laserMode,'value',Config.LaserMode);
     set(handles.checkbox_VidRed,'value',Config.VidRed);
+    set(handles.checkbox_toneMode,'value',Config.ToneMode);
+    set(handles.edit_TrialEnd,'string',Config.TrialEnd);
+    set(handles.edit_SoundDuration,'string',Config.SoundD);
+    set(handles.edit_ShockDuration,'string',Config.ShockD);
+    set(handles.edit_shockDelay,'string',Config.shockDelay);
+    set(handles.edit_LaserPreSound,'string',Config.LaserPreSound);
+    set(handles.edit_startDelay,'string',Config.StartDelay);
+    set(handles.radiobutton_startDelay,'Value',Config.StartDelayMode);
+    set(handles.edit_TrialNum,'string',Config.TrialNum);
+    set(handles.edit_MinInterval,'string',Config.MinInterval);
+    set(handles.edit_MaxInterval,'string',Config.MaxInterval);
+    catch 
+        display('Part of the configs are not assigned, probably is because they are not exist in the saved config. Edit manually, then save again.')
+    end
 end
 setappdata(0,'FC_config',Config);
 
@@ -576,6 +597,19 @@ Config.FCtrialData = get(handles.uitable_trialData,'Data');
 Config.ShockMode = get(handles.checkbox_shockMode,'value');
 Config.LaserMode = get(handles.checkbox_laserMode,'value');
 Config.VidRed = get(handles.checkbox_VidRed,'value');
+Config.ToneMode = get(handles.checkbox_toneMode,'value');
+Config.TrialEnd =  str2double(get(handles.edit_TrialEnd,'string'));
+Config.SoundD =  str2double(get(handles.edit_SoundDuration,'string'));
+Config.ShockD =  str2double(get(handles.edit_ShockDuration,'string'));
+Config.shockDelay =  str2double(get(handles.edit_shockDelay,'string'));
+Config.LaserPreSound = str2double(get(handles.edit_LaserPreSound,'string'));
+Config.StartDelay = str2double(get(handles.edit_startDelay,'string'));
+Config.StartDelayMode = get(handles.radiobutton_startDelay,'Value');
+
+Config.TrialNum = str2double(get(handles.edit_TrialNum,'string'));
+Config.MinInterval = str2double(get(handles.edit_MinInterval,'string'));
+Config.MaxInterval = str2double(get(handles.edit_MaxInterval,'string')); 
+
 setappdata(0,'FC_config',Config);
 [FileName,PathName,Index] = uiputfile('*.mat');
 if Index
@@ -620,3 +654,26 @@ function checkbox_toneMode_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_toneMode
+
+
+
+function edit_LaserPreSound_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_LaserPreSound (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_LaserPreSound as text
+%        str2double(get(hObject,'String')) returns contents of edit_LaserPreSound as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_LaserPreSound_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_LaserPreSound (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
