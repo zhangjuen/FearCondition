@@ -7,7 +7,10 @@ if str2double(get(handles.edit_TrialNum,'string'))>str2double(get(handles.text_t
     set(handles.text_trialNow,'string',trialNow);
     
     FCtrialData = get(handles.uitable_trialData,'Data');
-    fwrite(handles.serial_1,getappdata(0,'LEDCuePin'));
+    
+    if str2double(get(handles.edit_LaserPreSound,'string'))==0
+    fwrite(handles.serial_1,getappdata(0,'LEDCuePin'));%sound and tone start at the same time
+    end
 
     
     if get(handles.checkbox_toneMode,'value')

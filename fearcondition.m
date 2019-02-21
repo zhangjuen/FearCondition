@@ -111,6 +111,8 @@ handles.shockDelay =  str2double(get(handles.edit_shockDelay,'string'));
 LaserPreSound = str2double(get(handles.edit_LaserPreSound,'string'));
 StartDelay = str2double(get(handles.edit_startDelay,'string'));
 
+videoFR = 20;
+handles.videoFR = videoFR;
 %timer define
 TrialStartTimer = timer('TimerFcn',{@TrialStartTimer_callback_fcn,handles},'Period',0.1,'StartDelay',StartDelay*get(handles.radiobutton_startDelay,'Value'));
 setappdata(0,'TrialStartTimer',TrialStartTimer);
@@ -128,7 +130,7 @@ ShockOnTimer = timer('TimerFcn',{@ShockOnTimer_Callback,handles},'Period',0.1,'S
 setappdata(0,'ShockOnTimer',ShockOnTimer);
 ShockOffTimer = timer('TimerFcn',{@ShockOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound+handles.shockDelay+handles.ShockD);
 setappdata(0,'ShockOffTimer',ShockOffTimer);
-VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',0.1,'StartDelay',0,'ExecutionMode','fixedRate');
+VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',1/videoFR,'StartDelay',0,'ExecutionMode','fixedRate');
 setappdata(0,'VideoTimer',VideoTimer);
 EndTimer = timer('TimerFcn',{@EndTimer_Callback,handles},'Period',0.1,'StartDelay',60);
 setappdata(0,'EndTimer',EndTimer);
@@ -136,10 +138,9 @@ setappdata(0,'EndTimer',EndTimer);
 
 
 if get(handles.checkbox_VidRed,'Value')    
-    start(getappdata(0,'vid'));
-    FR = 10;    
+    start(getappdata(0,'vid'));      
 %     src = getselectedsource(vid);
-%     src.FrameRate = FR;    
+%     src.FrameRate = videoFR;    
    
     DataFolderPath = getappdata(0,'DataFolderPath');
     if isempty(DataFolderPath)
@@ -154,7 +155,7 @@ if get(handles.checkbox_VidRed,'Value')
     fileTime(fileTime==' ') = '_';
     videoFileName = [DataFolderPath,'\',fileTime, '.avi'];
     aviObj = VideoWriter(videoFileName);
-    aviObj.FrameRate = FR;
+    aviObj.FrameRate = videoFR;
     open(aviObj);
     setappdata(0,'aviObj',aviObj);    
     start(getappdata(0,'VideoTimer'));
@@ -308,6 +309,7 @@ Config.LaserMode = get(handles.checkbox_laserMode,'value');
 Config.VidRed = get(handles.checkbox_VidRed,'value');
 matlabData.Config = Config;
 matlabData.SoundFrame = getappdata(0,'SoundFrame');
+matlabData.videoFR = handles.videoFR;
 
 DataFolderPath = getappdata(0,'DataFolderPath');
 if ~isempty(DataFolderPath)
