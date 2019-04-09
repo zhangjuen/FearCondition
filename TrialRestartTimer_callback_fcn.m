@@ -13,7 +13,7 @@ if str2double(get(handles.edit_TrialNum,'string'))>str2double(get(handles.text_t
     start(getappdata(0,'TrialStartTimer'));   
     NextTrial = str2double(get(handles.text_trialNow,'string'))+1;
     disp(['Next Trial: ',num2str(NextTrial), '   Start Delay:', num2str(DelayNow)]);
-    
+    set(handles.text_timeLeft,'string',DelayNow);
 else
     display('Well done, wait for end 60s delay');
     start(getappdata(0,'EndTimer'));

@@ -22,7 +22,7 @@ function varargout = fearcondition(varargin)
 
 % Edit the above text to modify the response to help fearcondition
 
-% Last Modified by GUIDE v2.5 19-Feb-2019 14:40:48
+% Last Modified by GUIDE v2.5 09-Apr-2019 16:14:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -134,7 +134,8 @@ VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',1/videoFR,
 setappdata(0,'VideoTimer',VideoTimer);
 EndTimer = timer('TimerFcn',{@EndTimer_Callback,handles},'Period',0.1,'StartDelay',60);
 setappdata(0,'EndTimer',EndTimer);
-
+TimeLeftTimer = timer('TimerFcn',{@TimeLeftTimer_callback_fcn,handles},'Period',1,'ExecutionMode','fixedRate');
+% setappdata(0,'TimeLeftTimer',TimeLeftTimer);
 
 
 if get(handles.checkbox_VidRed,'Value')    
@@ -163,7 +164,8 @@ if get(handles.checkbox_VidRed,'Value')
 end
 
 start(TrialStartTimer);
-
+set(handles.text_timeLeft,'string',StartDelay*get(handles.radiobutton_startDelay,'Value'));
+start(TimeLeftTimer);
 handles.output = hObject;
 
 % Update handles structure
@@ -679,3 +681,44 @@ function edit_LaserPreSound_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+function edit_command_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_command (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_command as text
+%        str2double(get(hObject,'String')) returns contents of edit_command as a double
+command = get(hObject,'string');
+set(handles.edit_command,'string',[]);
+
+
+
+
+command = str2num(command);
+fwrite(handles.serial_1,command);
+str = ['Command is: ',num2str(command)];
+disp(str);
+
+% --- Executes during object creation, after setting all properties.
+function edit_command_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_command (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton_sendCommand.
+function pushbutton_sendCommand_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_sendCommand (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+edit_command_Callback(hObject, eventdata, handles)
