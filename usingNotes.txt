@@ -27,3 +27,12 @@
 
 4. press the stop to save the configrations
 
+
+Other notes: a. the tone is delivery via a buzzer(beeper, from sparkfun); the frequency is define by the arduino; matlab only send a command to start and stop
+             b. the laser is gated by arduino, it's mode, like freqency, pulse duration is coded in arduino (with timeNow timer); the matlab only send a command to define 
+             the on and off time point
+             c. the led is gated by arduino
+             d. command window is for manually send command to arduino (correlate with the command define in arduino)
+
+For arduino programe: zhangjuenxy@qq.com
+
