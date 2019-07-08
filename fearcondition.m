@@ -507,14 +507,22 @@ function checkbox_VidPre_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_VidPre
 if get(hObject,'Value')
-    if ~get(handles.checkbox_VidRed,'Value')    
-        vid = videoinput('winvideo', 1, 'MJPG_640x480');
-        setappdata(0,'vid',vid);
+    if ~get(handles.checkbox_VidRed,'Value')
+        %         dev_info = imaqhwinfo('winvideo', 1);
+        try
+            vid = videoinput('winvideo', 1,'YUY2_640x480');
+            setappdata(0,'vid',vid);
+        catch
+            display('image acquisition object reset');
+            imaqreset;
+            vid = videoinput('winvideo', 1,'YUY2_640x480');
+            setappdata(0,'vid',vid);
+        end
     end
     preview(getappdata(0,'vid'));
 else
     stoppreview(getappdata(0,'vid'));
-    if ~get(handles.checkbox_VidRed,'Value') 
+    if ~get(handles.checkbox_VidRed,'Value')
         delete(getappdata(0,'vid'));
         delete(imaqfind);
     end
@@ -530,7 +538,8 @@ function checkbox_VidRed_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of checkbox_VidRed
 if get(handles.checkbox_VidRed,'Value')
     if ~get(handles.checkbox_VidPre,'Value')
-        vid = videoinput('winvideo', 1, 'MJPG_640x480');
+        %         dev_info = imaqhwinfo('winvideo', 1);
+        vid = videoinput('winvideo', 1,'YUY2_640x480');
     else
         vid = getappdata(0,'vid');
     end    
