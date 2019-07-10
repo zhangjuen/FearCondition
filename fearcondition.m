@@ -518,8 +518,14 @@ if get(hObject,'Value')
             vid = videoinput('winvideo', 1,'YUY2_640x480');
             setappdata(0,'vid',vid);
         end
+        src = getselectedsource(vid);
+        src.FocusMode = 'manual';        
+        src.Focus = 12;
+        setappdata(0,'src',src);
     end
     preview(getappdata(0,'vid'));
+    CameraProperty;
+    
 else
     stoppreview(getappdata(0,'vid'));
     if ~get(handles.checkbox_VidRed,'Value')
