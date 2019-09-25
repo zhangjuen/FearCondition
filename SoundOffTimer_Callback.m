@@ -7,6 +7,7 @@ if get(handles.checkbox_VidRed,'value')
     aviObj = getappdata(0,'aviObj');
     SoundFrame = getappdata(0,'SoundFrame');
     SoundFrame(str2double(get(handles.text_trialNow,'string')),2) = aviObj.FrameCount;
+    SoundFrame(str2double(get(handles.text_trialNow,'string')),4) = aviObj.Duration;
     setappdata(0,'SoundFrame',SoundFrame);
 end
 end

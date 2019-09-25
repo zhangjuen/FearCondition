@@ -101,8 +101,8 @@ setappdata(0,'LEDCuePin',49);
 setappdata(0,'LaserPin',52);
 setappdata(0,'ShockPin',50);
 
-setappdata(0,'SoundFrame',zeros(str2double(get(handles.edit_TrialNum,'string')),2));
-
+setappdata(0,'SoundFrame',zeros(str2double(get(handles.edit_TrialNum,'string')),4));
+%frame and time
 
 TrialEnd =  str2double(get(handles.edit_TrialEnd,'string'));
 handles.SoundD =  str2double(get(handles.edit_SoundDuration,'string'));
@@ -111,8 +111,8 @@ handles.shockDelay =  str2double(get(handles.edit_shockDelay,'string'));
 LaserPreSound = str2double(get(handles.edit_LaserPreSound,'string'));
 StartDelay = str2double(get(handles.edit_startDelay,'string'));
 
-videoFR = 20;
-handles.videoFR = videoFR;
+% videoFR = 30;
+% handles.videoFR = videoFR;
 %timer define
 TrialStartTimer = timer('TimerFcn',{@TrialStartTimer_callback_fcn,handles},'Period',0.1,'StartDelay',StartDelay*get(handles.radiobutton_startDelay,'Value'));
 setappdata(0,'TrialStartTimer',TrialStartTimer);
@@ -130,19 +130,15 @@ ShockOnTimer = timer('TimerFcn',{@ShockOnTimer_Callback,handles},'Period',0.1,'S
 setappdata(0,'ShockOnTimer',ShockOnTimer);
 ShockOffTimer = timer('TimerFcn',{@ShockOffTimer_Callback,handles},'Period',0.1,'StartDelay',handles.SoundD+LaserPreSound+handles.shockDelay+handles.ShockD);
 setappdata(0,'ShockOffTimer',ShockOffTimer);
-VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',1/videoFR,'StartDelay',0,'ExecutionMode','fixedRate');
-setappdata(0,'VideoTimer',VideoTimer);
+% VideoTimer = timer('TimerFcn',{@VideoTimer_Callback,handles},'Period',1/videoFR,'StartDelay',0,'ExecutionMode','fixedRate');
+% setappdata(0,'VideoTimer',VideoTimer);
 EndTimer = timer('TimerFcn',{@EndTimer_Callback,handles},'Period',0.1,'StartDelay',60);
 setappdata(0,'EndTimer',EndTimer);
 TimeLeftTimer = timer('TimerFcn',{@TimeLeftTimer_callback_fcn,handles},'Period',1,'ExecutionMode','fixedRate');
 % setappdata(0,'TimeLeftTimer',TimeLeftTimer);
 
 
-if get(handles.checkbox_VidRed,'Value')    
-    start(getappdata(0,'vid'));      
-%     src = getselectedsource(vid);
-%     src.FrameRate = videoFR;    
-   
+if get(handles.checkbox_VidRed,'Value')      
     DataFolderPath = getappdata(0,'DataFolderPath');
     if isempty(DataFolderPath)
         DataFolderPath = 'G:\data';
@@ -156,10 +152,18 @@ if get(handles.checkbox_VidRed,'Value')
     fileTime(fileTime==' ') = '_';
     videoFileName = [DataFolderPath,'\',fileTime, '.avi'];
     aviObj = VideoWriter(videoFileName);
-    aviObj.FrameRate = videoFR;
-    open(aviObj);
+    
+    vid = getappdata(0,'vid');
+    %     start(getappdata(0,'vid'));      
+    src = getselectedsource(vid);    
+    handles.videoFR = src.FrameRate;
+    aviObj.FrameRate = str2num(src.FrameRate);
+    vid.DiskLogger = aviObj;
+    start(vid);
+    setappdata(0,'CameraTic',tic);
+%     open(aviObj);
     setappdata(0,'aviObj',aviObj);    
-    start(getappdata(0,'VideoTimer'));
+%     start(getappdata(0,'VideoTimer'));
     setappdata(0,'DataFolderPath',DataFolderPath);
 end
 
@@ -551,7 +555,10 @@ if get(handles.checkbox_VidRed,'Value')
     end    
     vid.FramesPerTrigger = inf;
     vid.ReturnedColorspace = 'rgb';
-    vid.LoggingMode = 'memory';
+%     vid.LoggingMode = 'memory';
+    vid.LoggingMode = 'disk&memory';
+    src = getselectedsource(vid);
+    src.FrameRate = '20.0000';
 %     vid.DiskLogger = aviObj;
     setappdata(0,'vid',vid);
 elseif ~get(handles.checkbox_VidPre,'Value')

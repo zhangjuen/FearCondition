@@ -140,6 +140,7 @@ switch Action
         imshow(frame);
         h = imrect();
         position = wait(h);
+        position(position<1) = 1;
         vid.ROIPosition = floor(position);
         close(f)
 %         preview(vid);  
